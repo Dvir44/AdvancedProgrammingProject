@@ -7,12 +7,15 @@ public class TopicManagerSingleton {
 	
 	// inner class
 	public static class TopicManager {	
-		private static final TopicManager instance = new TopicManager();
+		private static final TopicManager instance;
 		private ConcurrentHashMap<String, Topic> map;
+		
+		// for the instance to get created only once
+		static { instance = new TopicManager(); }
 		
 		// constructor
 		private TopicManager() {
-			this.map = new ConcurrentHashMap<>();
+			this.map = new ConcurrentHashMap<String, Topic>();
 		}
 		
 		public Topic getTopic(String topic) {

@@ -44,6 +44,7 @@ public class ParallelAgent implements Agent {
     public void callback(String topic, Message msg) {
     	try {
     		queue.put(new Message(topic));
+    		queue.put(msg);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

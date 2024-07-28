@@ -11,8 +11,8 @@ public class Topic {
 	
 	Topic(String name) {
 		this.name = name;
-        this.subs = new ArrayList<>();
-        this.pubs = new ArrayList<>();
+        this.subs = new ArrayList<Agent>();
+        this.pubs = new ArrayList<Agent>();
 	}
 	
 	// getters
