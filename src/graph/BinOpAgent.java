@@ -49,24 +49,22 @@ public class BinOpAgent implements Agent {
 	public void callback(String topic, Message msg) {
 		// convert the message to double
 		Double numberMessage = msg.asDouble;
-		if (Double.isNaN(numberMessage)) { // checks if we can't convert the message
-			return;
+		if (!Double.isNaN(numberMessage)) { // checks if we can't convert the message
+			// checks if the first or second message are the topic we look for
+			if (topic.equals(this.input1)) {
+				this.numberInput1 = numberMessage;
+			}
+			if (topic.equals(this.input2)) {
+				this.numberInput2 = numberMessage;
+			}
+			// checks if both inputs been changed before doing the operation
+			if (Double.isNaN(this.numberInput1) || Double.isNaN(this.numberInput2)) {
+				return;
+			}
+			Double result = operation.apply(this.numberInput1, this.numberInput2);
+			Message resultMessage = new Message(result);
+			manager.getTopic(this.output).publish(resultMessage); // publish it
 		}
-		// checks if the first or second message are the topic we look for
-		if (topic.equals(this.input1)) {
-			this.numberInput1 = numberMessage;
-		}
-		if (topic.equals(this.input2)) {
-			this.numberInput2 = numberMessage;
-		}
-		// checks if both inputs been changed before doing the operation
-		if (Double.isNaN(this.numberInput1) || Double.isNaN(this.numberInput2)) {
-			return;
-		}
-		Double result = operation.apply(this.numberInput1, this.numberInput2);
-		Message resultMessage = new Message(result);
-		manager.getTopic(this.output).publish(resultMessage); // publish it
-		
 	}
 	
 
