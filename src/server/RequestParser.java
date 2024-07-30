@@ -71,7 +71,14 @@ public class RequestParser {
         
         byte[] content = bodyBuilder.toString().getBytes();
 
+        System.out.println("b");
+        System.out.println(command);
+        System.out.println(uri);
+        System.out.println(parameters);
+        System.out.println(content);
         return new RequestInfo(command, uri, uriParts, parameters, content);
+        
+        
     }
 	
 	// the inner class for the methods we receive in the http requests

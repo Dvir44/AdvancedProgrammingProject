@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRAPHGENIE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body, html {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: #f0f0f0;
+        }
+        .page-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            color: #333;
+            padding: 20px 0;
+            margin: 0;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 2.5em;
+            letter-spacing: 2px;
+        }
+        .content-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        .section {
+            background-color: white;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+        .form-section {
+            flex: 1;
+            min-width: 250px;
+        }
+        .graph-section {
+            flex: 3;
+        }
+        .table-section {
+            flex: 2;
+        }
+        h2 {
+            margin-top: 0;
+            color: #444;
+        }
+        iframe {
+            border: none;
+            flex: 1;
+            width: 100%;
+        }
+        .error-log {
+            color: red;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+        @media (max-width: 768px) {
+            .content-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <h1>GRAPHGENIE</h1>
+        
+        <div class="content-container">
+            <div class="section form-section">
+                <h2>Forms</h2>
+                <div id="errorLogForm" class="error-log"></div>
+                <iframe id="formFrame" src="form.html"></iframe>
+            </div>
+            
+            <div class="section graph-section">
+                <h2>Graph Visualization</h2>
+                <div id="errorLogGraph" class="error-log"></div>
+                <iframe id="graphFrame" src="temp.html"></iframe>
+            </div>
+
+            <div class="section table-section">
+                <h2>Table</h2>
+                <div id="errorLogTable" class="error-log"></div>
+                <iframe id="tableFrame" src="temp.html"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function deployGraph() {
+            fetch('graph.html')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    const frame = document.getElementById('graphFrame');
+                    frame.srcdoc = html;
+                    frame.onload = () => {
+                        console.log('Graph loaded successfully');
+                    };
+                })
+                .catch(error => {
+                    console.error('Error loading graph:', error);
+                    document.getElementById('errorLogGraph').textContent = `Error: ${error.message}`;
+                });
+        }
+
+        function deployTable() {
+            fetch('table.html')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    const frame = document.getElementById('tableFrame');
+                    frame.srcdoc = html;
+                    frame.onload = () => {
+                        console.log('Table loaded successfully');
+                    };
+                })
+                .catch(error => {
+                    console.error('Error loading table:', error);
+                    document.getElementById('errorLogTable').textContent = `Error: ${error.message}`;
+                });
+        }
+
+        // Listen for messages from the form iframe
+        window.addEventListener('message', function(event) {
+            if (event.data === 'deployGraph') {
+                deployGraph();
+            } else if (event.data === 'deployTable') {
+                deployTable();
+            }
+        }, false);
+
+        // Log any errors from the iframes
+        window.addEventListener('error', function(e) {
+            if (e.target.tagName === 'IFRAME') {
+                console.error('Error in iframe:', e);
+                document.getElementById('errorLog').textContent = `Error in iframe: ${e.message}`;
+            }
+        }, true);
+    </script>
+</body>
+</html>
