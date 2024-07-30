@@ -8,11 +8,13 @@ public class Topic {
 	public final String name;
 	private List<Agent> subs;
 	private List<Agent> pubs;
+	private Message msg;
 	
 	Topic(String name) {
 		this.name = name;
         this.subs = new ArrayList<Agent>();
         this.pubs = new ArrayList<Agent>();
+        this.msg = new Message("");
 	}
 	
 	// getters
@@ -22,6 +24,10 @@ public class Topic {
 	
 	public List<Agent> getPubs() {
 		return pubs;
+	}
+	
+	public Message getMessage() {
+		return this.msg;
 	}
 	
 	public void subscribe(Agent other) {
@@ -41,6 +47,7 @@ public class Topic {
 	}
 	
 	public void publish(Message msg) {
+		this.msg = msg;
 		for (Agent sub : subs) {
             sub.callback(name, msg);
         }
