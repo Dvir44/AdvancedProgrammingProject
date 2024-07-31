@@ -18,6 +18,10 @@ public class Topic {
 	}
 	
 	// getters
+	public String getName() {
+		return this.name;
+	}
+	
 	public List<Agent> getSubs(){
 		return subs;
 	}

@@ -27,7 +27,7 @@ public class Message {
 	// second constructor - gets the message as a bytes array and fill all the members of the class (use the first constructor)
 	public Message(byte[] data) {
 		// we convert the bytes array to string and then update all the members
-		this(data.toString());
+		this(new String(data.toString()));
 	}
 	
 	// third constructor - gets the message as a double and fill all the members of the class (use the first constructor)
