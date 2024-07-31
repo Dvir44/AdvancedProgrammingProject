@@ -1,16 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scaleI'll continue with the `graph.html` file. This file will use D3.js to visualize the graph data.
-
-### `graph.html`
-
-This file will visualize the graph using D3.js. Replace the placeholders with actual data as necessary.
-
-```html
-<!DOCTYPE html>
-<html lang="en">
 
 <head>
     <meta charset="UTF-8">
@@ -62,6 +51,7 @@ This file will visualize the graph using D3.js. Replace the placeholders with ac
                 .join("line")
                 .attr("stroke", "#999")
                 .attr("stroke-opacity", 0.6)
+                .html
                 .attr("stroke-width", 2)
                 .attr("marker-end", "url(#arrowhead)");
 
@@ -70,7 +60,7 @@ This file will visualize the graph using D3.js. Replace the placeholders with ac
                 .data(data.nodes)
                 .join("circle")
                 .attr("r", 20)
-                .attr("fill", d => d.color || "#69b3a2");  // Use the color from the node data, or default to "#69b3a2"
+                .attr("fill", d => d.color || "#69b3a2");
 
             const nodeLabel = svg.append("g")
                 .selectAll("text")
@@ -123,25 +113,15 @@ This file will visualize the graph using D3.js. Replace the placeholders with ac
             });
         }
 
-        // Example data
-        const nodes = [
-            { id: 'A', color: '#ff6347', message: 'Hello A' },
-            { id: 'B', color: '#4682b4', message: 'Hello B' },
-            { id: 'C', color: '#3cb371', message: 'Hello C' }
-        ];
-
-        const links = [
-            { source: 'A', target: 'B' },
-            { source: 'B', target: 'C' },
-            { source: 'C', target: 'A' }
-        ];
-
-        createGraph(nodes, links);
-
         window.addEventListener('resize', function () {
             document.getElementById('graph').innerHTML = '';
-            createGraph(nodes, links);
+            createGraph(NODES, EDGES);
         });
+
+        const NODES = []; // Placeholder for nodes data
+        const EDGES = []; // Placeholder for edges data
+
+        createGraph(NODES, EDGES);
     </script>
 </body>
 

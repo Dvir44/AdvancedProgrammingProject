@@ -12,14 +12,11 @@
         form {
             margin-bottom: 20px;
         }
-        button {
-            margin-top: 10px;
-        }
     </style>
 </head>
 <body>
     <h2>Configuration Upload</h2>
-    <form id="uploadForm" action="http://localhost:8080/upload" method="post" enctype="multipart/form-data">
+    <form id="uploadForm" action="http://localhost:8080/upload" method="post" enctype="multipart/form-data" target="_parent">
         <input type="file" id="confFile" name="confFile" required>
         <button type="submit" id="deployButton">Deploy</button>
     </form>
@@ -31,7 +28,7 @@
             // Create a FormData object from the form
             var formData = new FormData(this);
             formData.append("filename", document.getElementById("confFile").value);
-                        
+
             // Perform the form submission using fetch
             fetch(this.action, {
                 method: this.method,
@@ -54,6 +51,7 @@
     </form>
 
     <script type="text/javascript">
+
         document.getElementById('publishForm').addEventListener('submit', function(event) {
             event.preventDefault(); // Prevent the default form submission
 

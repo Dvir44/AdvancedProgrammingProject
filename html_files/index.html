@@ -40,11 +40,9 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
         }
         .form-section {
             flex: 1;
-            min-width: 250px;
         }
         .graph-section {
             flex: 3;
@@ -57,7 +55,8 @@
             color: #444;
         }
         iframe {
-            border: none;
+            border: 2px solid #ddd;
+            border-radius: 4px;
             flex: 1;
             width: 100%;
         }
@@ -79,21 +78,21 @@
         
         <div class="content-container">
             <div class="section form-section">
-                <h2>Forms</h2>
+                <h2>Form</h2>
                 <div id="errorLogForm" class="error-log"></div>
-                <iframe id="formFrame" src="form.html"></iframe>
+                <iframe id="formFrame" src="form.html" scrolling="no"></iframe>
             </div>
             
             <div class="section graph-section">
                 <h2>Graph Visualization</h2>
                 <div id="errorLogGraph" class="error-log"></div>
-                <iframe id="graphFrame" src="temp.html"></iframe>
+                <iframe id="graphFrame" src="about:blank"></iframe>
             </div>
 
             <div class="section table-section">
                 <h2>Table</h2>
                 <div id="errorLogTable" class="error-log"></div>
-                <iframe id="tableFrame" src="temp.html"></iframe>
+                <iframe id="tableFrame" src="about:blank"></iframe>
             </div>
         </div>
     </div>

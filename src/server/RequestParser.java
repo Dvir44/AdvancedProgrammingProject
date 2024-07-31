@@ -36,8 +36,8 @@ public class RequestParser {
                 String[] keyValue = pair.split("="); 
                 if (keyValue.length != 2)
                     throw new IllegalArgumentException("Invalid HTTP parameter: " + pair);
-                String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8.name());
-                String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8.name());
+                String key = URLDecoder.decode(keyValue[0], StandardCharsets.UTF_8);
+                String value = URLDecoder.decode(keyValue[1], StandardCharsets.UTF_8);
                 parameters.put(key, value);
             }
         } else {
@@ -71,7 +71,11 @@ public class RequestParser {
         
         byte[] content = bodyBuilder.toString().getBytes();
 
-    
+        System.out.println("b");
+        System.out.println(command);
+        System.out.println(uri);
+        System.out.println(parameters);
+        System.out.println(content.toString());
         return new RequestInfo(command, uri, uriParts, parameters, content);
         
         

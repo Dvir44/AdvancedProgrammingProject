@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.List;
 
 import configs.GenericConfig;
 import graph.Graph;
@@ -17,139 +18,107 @@ import views.HtmlGraphWriter;
 
 public class ConfLoader implements Servlet {
 
-	private final String graphPath;
-	private final String tablePath;
-	private GenericConfig config;
-	private final String directory;
+    private final String graphPath;
+    private final String tablePath;
+    private GenericConfig config;
+    private final String directory;
 
-	public ConfLoader(String htmlDirectory) {
-		this.directory = htmlDirectory;
-		this.graphPath = htmlDirectory + "/graph.html";
-		this.tablePath = htmlDirectory + "/table.html";
-		this.config = new GenericConfig();
-	}
+    public ConfLoader(String htmlDirectory) {
+        this.directory = htmlDirectory;
+        this.graphPath = htmlDirectory + "/graph.html";
+        this.tablePath = htmlDirectory + "/table.html";
+        this.config = new GenericConfig();
+    }
 
-	public void createTable() {
-		// Initialize StringBuilder to construct HTML content
-		StringBuilder html = new StringBuilder();
-		html.append("<html>\n\t<body>\n")
-				.append("\t\t<table border='1'>\n\t\t\t<tr><th>Topic</th><th>Message</th></tr>\n");
+    public void createTable() {
+        System.out.println("Creating table HTML...");
+        StringBuilder html = new StringBuilder();
+        html.append("<html>\n\t<body>\n")
+            .append("\t\t<table border='1'>\n\t\t\t<tr><th>Topic</th><th>Message</th></tr>\n");
 
-		// Populate table rows with topic data
-		for (Topic topic : TopicManagerSingleton.get().getTopics()) {
-			html.append("\t\t\t<tr><td>").append(topic.name).append("</td>")
-					.append("<td>").append(topic.getMessage().asText).append("</td></tr>\n");
-		}
+        for (Topic topic : TopicManagerSingleton.get().getTopics()) {
+            html.append("\t\t\t<tr><td>").append(topic.name).append("</td>")
+                .append("<td>").append(topic.getMessage().asText).append("</td></tr>\n");
+        }
 
-		html.append("\t\t</table>\n\t</body>\n</html>");
+        html.append("\t\t</table>\n\t</body>\n</html>");
+        String htmlContent = html.toString();
+        Path tableFilePath = Paths.get(this.tablePath);
 
-		// Convert StringBuilder to string
-		String htmlContent = html.toString();
+        try {
+            Files.deleteIfExists(tableFilePath);
+            Files.write(tableFilePath, htmlContent.getBytes());
+            System.out.println("Table HTML created at " + tableFilePath.toString());
+        } catch (IOException e) {
+            System.err.println("An error occurred while writing the table HTML.");
+            e.printStackTrace();
+        }
+    }
 
-		Path tableFilePath = Paths.get(this.tablePath);
+    public void createGraph() {
+        System.out.println("Creating graph HTML...");
+        Graph graph = new Graph();
+        graph.createFromTopics();
 
-		// Delete existing file if it exists
-		try {
-			Files.deleteIfExists(tableFilePath);
-		} catch (IOException e) {
-			System.err.println("Failed to delete existing table file.");
-			e.printStackTrace();
-		}
+        if (graph.hasCycles()) {
+            System.out.println("Graph has cycles. Aborting graph creation.");
+            return;
+        }
 
-		// Write new HTML content to file
-		try {
-			Files.write(tableFilePath, htmlContent.getBytes());
-		} catch (IOException e) {
-			System.err.println("An error occurred while writing the table HTML.");
-			e.printStackTrace();
-		}
-	}
+        List<String> graphHtmlLines = HtmlGraphWriter.getGraphHTML(graph, this.directory + "/graphTemplate.html");
 
-	public void createGraph() {
-		Graph graph = new Graph(); // Initialize Graph instance
-		graph.createFromTopics();
+        Path graphFilePath = Paths.get(this.graphPath);
+        try {
+            Files.deleteIfExists(graphFilePath);
+            Files.write(graphFilePath, String.join("\n", graphHtmlLines).getBytes());
+            System.out.println("Graph HTML created at " + graphFilePath.toString());
+        } catch (IOException e) {
+            System.err.println("An error occurred while writing the graph HTML.");
+            e.printStackTrace();
+        }
+    }
 
-		// Check for cycles and return if any are found
-		if (graph.hasCycles()) {
-			return;
-		}
+    @Override
+    public void handle(RequestInfo ri, OutputStream toClient) throws IOException {
+        if (!"POST".equals(ri.getHttpCommand())) {
+            String response = "HTTP/1.1 405 Method Not Allowed\r\n\r\n";
+            toClient.write(response.getBytes());
+            toClient.flush();
+            return;
+        }
 
-		// Generate HTML representation of the graph
-		String graphHtml = String.join("\n",
-				HtmlGraphWriter.getGraphHTML(graph, this.directory + "/graphTemplate.html"));
+        Map<String, String> parameters = ri.getParameters();
+        String fileName = parameters.get("filename");
+        byte[] fileContent = ri.getContent();
 
-		// Delete existing file if it exists
-		Path graphFilePath = Paths.get(this.graphPath);
-		try {
-			Files.deleteIfExists(graphFilePath);
-		} catch (IOException e) {
-			System.err.println("Failed to delete existing graph file.");
-			e.printStackTrace();
-		}
+        if (fileName != null && fileContent != null && fileContent.length > 0) {
+            Path filePath = Paths.get(directory, fileName);
+            Files.write(filePath, fileContent);
 
-		// Write new HTML content to file
-		try {
-			Files.write(graphFilePath, graphHtml.getBytes());
-		} catch (IOException e) {
-			System.err.println("An error occurred while writing the graph HTML.");
-			e.printStackTrace();
-		}
-	}
+            config.setConfFile(filePath.toString());
+            config.create();
 
-	@Override
-	public void handle(RequestInfo ri, OutputStream toClient) throws IOException {
-		if (!"POST".equals(ri.getHttpCommand())) {
-			// Respond with 405 Method Not Allowed if the HTTP command is not POST
-			String response = "HTTP/1.1 405 Method Not Allowed\r\n\r\n";
-			toClient.write(response.getBytes());
-			toClient.flush();
-			return;
-		}
+            Files.deleteIfExists(filePath);
 
-		Map<String, String> parameters = ri.getParameters();
-		String fileName = parameters.get("filename");
-		byte[] fileContent = ri.getContent();
+            this.createGraph();
+            this.createTable();
 
-		if (fileName != null && fileContent != null && fileContent.length > 0) {
-			// Save the uploaded file content to the specified file
-			Files.write(Paths.get(fileName), fileContent);
+            String response = "HTTP/1.1 200 OK\r\n\r\n";
+            toClient.write(response.getBytes());
+            toClient.flush();
+            System.out.println("Configuration uploaded and processed successfully.");
+        } else {
+            String response = "HTTP/1.1 400 Bad Request\r\n\r\nMissing file name or content";
+            toClient.write(response.getBytes());
+            toClient.flush();
+            System.out.println("Missing file name or content.");
+        }
+    }
 
-			// Process the configuration from the uploaded file
-			config.setConfFile(fileName);
-			config.create();
-
-			// Delete the temporary file after processing
-			File file = new File(fileName);
-			file.delete();
-
-			// Generate additional content as needed
-			this.createGraph();
-			this.createTable();
-
-			// Respond with 200 OK for successful processing
-			String response = "HTTP/1.1 200 OK\r\n" +
-					"\r\n";
-			toClient.write(response.getBytes());
-			toClient.flush();
-		} else {
-			// Respond with 400 Bad Request if file name or content is missing
-			String response = "HTTP/1.1 400 Bad Request\r\n\r\nMissing file name or content";
-			toClient.write(response.getBytes());
-			toClient.flush();
-		}
-	}
-
-	@Override
-	public void close() throws IOException {
-		config.close();
-		// Remove existing content
-		File file = new File(this.graphPath);
-		if (file.exists()) {
-			file.delete();
-		}
-		file = new File(this.tablePath);
-		if (file.exists()) {
-			file.delete();
-		}
-	}
+    @Override
+    public void close() throws IOException {
+        config.close();
+        Files.deleteIfExists(Paths.get(this.graphPath));
+        Files.deleteIfExists(Paths.get(this.tablePath));
+    }
 }
