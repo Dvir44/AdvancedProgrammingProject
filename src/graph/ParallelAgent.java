@@ -40,6 +40,10 @@ public class ParallelAgent implements Agent {
         agent.reset();
     }
     
+    public boolean isClosed() {
+    	return this.interrupt;
+    }
+    
     @Override
     public void callback(String topic, Message msg) {
     	try {
