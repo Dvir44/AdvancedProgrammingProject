@@ -87,7 +87,12 @@ public class PlusAgent implements Agent {
 	
 	@Override
 	public void close() {
-		return;
+		if (this.topic1 != null)
+            manager.getTopic(this.topic1).unsubscribe(this);
+		if (this.topic2 != null)
+			manager.getTopic(this.topic2).unsubscribe(this);
+        if (this.output != null)
+            manager.getTopic(this.output).removePublisher(this);
 	}
 
 

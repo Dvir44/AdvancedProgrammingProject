@@ -8,40 +8,44 @@
         body {
             font-family: Arial, sans-serif;
             padding: 20px;
+            background-color: #f8f9fa;
+        }
+        h2 {
+            color: #333;
         }
         form {
             margin-bottom: 20px;
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input[type="file"],
+        input[type="text"],
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
     <h2>Configuration Upload</h2>
-    <form id="uploadForm" action="http://localhost:8080/upload" method="post" enctype="multipart/form-data" target="_parent">
+    <form id="uploadForm" action="http://localhost:8080/upload" method="post" enctype="multipart/form-data">
         <input type="file" id="confFile" name="confFile" required>
         <button type="submit" id="deployButton">Deploy</button>
     </form>
-
-    <script type="text/javascript">
-        document.getElementById('uploadForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the default form submission
-
-            // Create a FormData object from the form
-            var formData = new FormData(this);
-            formData.append("filename", document.getElementById("confFile").value);
-
-            // Perform the form submission using fetch
-            fetch(this.action, {
-                method: this.method,
-                body: formData
-            }).then(response => {
-                // Form submission successful, now send the postMessage
-                window.parent.postMessage('deployGraph', '*');
-                window.parent.postMessage('deployTable', '*');
-            }).catch(error => {
-                console.error('Error during form submission:', error);
-            });
-        });
-    </script>
+    <div id="errorLogForm" class="error-log"></div>
 
     <h2>Send Message to Topic</h2>
     <form id="publishForm">
@@ -51,24 +55,31 @@
     </form>
 
     <script type="text/javascript">
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            formData.append("filename", document.getElementById("confFile").value);
+            fetch(this.action, {
+                method: this.method,
+                body: formData
+            }).then(response => {
+                window.parent.postMessage('deployGraph', '*');
+                window.parent.postMessage('deployTable', '*');
+            }).catch(error => {
+                console.error('Error during form submission:', error);
+            });
+        });
 
         document.getElementById('publishForm').addEventListener('submit', function(event) {
-            event.preventDefault(); // Prevent the default form submission
-
+            event.preventDefault();
             const message = document.getElementById("message").value;
             const topic = document.getElementById("topic").value;
-
             const url = `http://localhost:8080/publish?message=${encodeURIComponent(message)}&topic=${encodeURIComponent(topic)}`;
-
-            // Perform the form submission using fetch
             fetch(url, {
                 method: 'GET',
-            })
-            .then(data => {
-                console.log("Success!", data);
+            }).then(data => {
                 document.getElementById('deployButton').click();
-            })
-            .catch(error => {
+            }).catch(error => {
                 console.error('Error during sending the message:', error);
             });
         });

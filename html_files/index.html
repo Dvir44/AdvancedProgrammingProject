@@ -3,96 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GRAPHGENIE</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <title>GraphMaster</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body, html {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 0;
             height: 100%;
             background-color: #f0f0f0;
-        }
-        .page-container {
             display: flex;
-            flex-direction: column;
-            height: 100vh;
         }
-        h1 {
-            font-family: 'Orbitron', sans-serif;
-            text-align: center;
-            color: #333;
-            padding: 20px 0;
-            margin: 0;
-            background-color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            font-size: 2.5em;
-            letter-spacing: 2px;
-        }
-        .content-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-        .section {
-            background-color: white;
+        .sidebar {
+            width: 200px;
+            background-color: #333;
+            color: #fff;
             padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .sidebar h1 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+        .content {
+            flex: 1;
             display: flex;
             flex-direction: column;
         }
-        .form-section {
+        .upload-section {
+            background-color: #007bff;
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .upload-section form {
+            display: flex;
+            gap: 10px;
+        }
+        .upload-section input,
+        .upload-section button {
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+        }
+        .upload-section button {
+            background-color: #0056b3;
+            color: white;
+            cursor: pointer;
+        }
+        .upload-section button:hover {
+            background-color: #003f8a;
+        }
+        .main-content {
             flex: 1;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
         }
-        .graph-section {
-            flex: 3;
-        }
-        .table-section {
-            flex: 2;
-        }
-        h2 {
-            margin-top: 0;
-            color: #444;
+        .graph-section, .table-section {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         iframe {
-            border: 2px solid #ddd;
-            border-radius: 4px;
-            flex: 1;
+            border: none;
             width: 100%;
+            height: 100%;
         }
         .error-log {
             color: red;
-            margin-bottom: 10px;
             font-size: 0.9em;
-        }
-        @media (max-width: 768px) {
-            .content-container {
-                flex-direction: column;
-            }
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="page-container">
-        <h1>GRAPHGENIE</h1>
-        
-        <div class="content-container">
-            <div class="section form-section">
-                <h2>Form</h2>
-                <div id="errorLogForm" class="error-log"></div>
-                <iframe id="formFrame" src="form.html" scrolling="no"></iframe>
-            </div>
-            
-            <div class="section graph-section">
+    <div class="sidebar">
+        <h1>GraphMaster</h1>
+        <p>Visualization and Management</p>
+    </div>
+    <div class="content">
+        <div class="upload-section">
+            <form id="uploadForm" action="http://localhost:8080/upload" method="post" enctype="multipart/form-data">
+                <input type="file" id="confFile" name="confFile" required>
+                <button type="submit" id="deployButton">Deploy</button>
+            </form>
+            <div id="errorLogForm" class="error-log"></div>
+        </div>
+        <div class="main-content">
+            <div class="graph-section">
                 <h2>Graph Visualization</h2>
-                <div id="errorLogGraph" class="error-log"></div>
                 <iframe id="graphFrame" src="about:blank"></iframe>
+                <div id="errorLogGraph" class="error-log"></div>
             </div>
-
-            <div class="section table-section">
-                <h2>Table</h2>
-                <div id="errorLogTable" class="error-log"></div>
+            <div class="table-section">
+                <h2>Table Information</h2>
                 <iframe id="tableFrame" src="about:blank"></iframe>
+                <div id="errorLogTable" class="error-log"></div>
             </div>
         </div>
     </div>
@@ -140,7 +149,6 @@
                 });
         }
 
-        // Listen for messages from the form iframe
         window.addEventListener('message', function(event) {
             if (event.data === 'deployGraph') {
                 deployGraph();
@@ -149,7 +157,6 @@
             }
         }, false);
 
-        // Log any errors from the iframes
         window.addEventListener('error', function(e) {
             if (e.target.tagName === 'IFRAME') {
                 console.error('Error in iframe:', e);

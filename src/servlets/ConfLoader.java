@@ -6,8 +6,8 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import configs.GenericConfig;
 import graph.Graph;
@@ -91,28 +91,32 @@ public class ConfLoader implements Servlet {
         String fileName = parameters.get("filename");
         byte[] fileContent = ri.getContent();
 
-        if (fileName != null && fileContent != null && fileContent.length > 0) {
-            Path filePath = Paths.get(directory, fileName);
-            Files.write(filePath, fileContent);
+        System.out.println("Received fileName: " + fileName);
+        System.out.println("Received fileContent length: " + (fileContent != null ? fileContent.length : "null"));
 
-            config.setConfFile(filePath.toString());
-            config.create();
-
-            Files.deleteIfExists(filePath);
-
-            this.createGraph();
-            this.createTable();
-
-            String response = "HTTP/1.1 200 OK\r\n\r\n";
-            toClient.write(response.getBytes());
-            toClient.flush();
-            System.out.println("Configuration uploaded and processed successfully.");
-        } else {
+        if (fileName == null || fileName.isEmpty() || fileContent == null || fileContent.length == 0) {
             String response = "HTTP/1.1 400 Bad Request\r\n\r\nMissing file name or content";
             toClient.write(response.getBytes());
             toClient.flush();
             System.out.println("Missing file name or content.");
+            return;
         }
+
+        Path filePath = Paths.get(directory, fileName);
+        Files.write(filePath, fileContent);
+
+        config.setConfFile(filePath.toString());
+        config.create();
+
+        Files.deleteIfExists(filePath);
+
+        this.createGraph();
+        this.createTable();
+
+        String response = "HTTP/1.1 200 OK\r\n\r\n";
+        toClient.write(response.getBytes());
+        toClient.flush();
+        System.out.println("Configuration uploaded and processed successfully.");
     }
 
     @Override
