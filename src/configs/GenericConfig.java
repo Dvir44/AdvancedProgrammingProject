@@ -24,6 +24,7 @@ public class GenericConfig implements Config {
 	
 	public GenericConfig() {
 		this.agents = new ArrayList<Agent>(); // set an array for the agents
+		this.file_name = "";
 	}
 	
 	public void setConfFile(String file_name) {

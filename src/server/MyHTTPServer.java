@@ -31,7 +31,6 @@ public class MyHTTPServer extends Thread implements HTTPServer {
     private volatile boolean running; // for the thread
     
     public MyHTTPServer(int port, int maxThreads) throws IOException {
-    	System.out.println("a");
     	this.port = port;
     	this.maxThreads = maxThreads;
     	try {
@@ -40,7 +39,6 @@ public class MyHTTPServer extends Thread implements HTTPServer {
             throw new RuntimeException("Failed to initialize server socket on port " + port, e);
         }
         //this.threadPool = Executors.newFixedThreadPool(maxThreads);
-        System.out.println("c");
         this.get = new ConcurrentHashMap<String, Servlet>();
         this.post = new ConcurrentHashMap<String, Servlet>();
         this.delete = new ConcurrentHashMap<String, Servlet>();
@@ -120,7 +118,6 @@ public class MyHTTPServer extends Thread implements HTTPServer {
             while (running) {
                 Socket clientSocket = serverSocket.accept();
                 threadPool.execute(() -> handleClient(clientSocket));
-                System.out.println("d");
             }
         } catch (IOException e) {
             if (running) {
@@ -135,15 +132,10 @@ public class MyHTTPServer extends Thread implements HTTPServer {
             RequestInfo requestInfo = RequestParser.parseRequest(in);
             String command = requestInfo.getHttpCommand();
             String uri = requestInfo.getUri();
-            System.out.println("h");
-            System.out.println(command);
-            System.out.println(uri);
             Servlet servlet = findServlet(command, uri);
             if (servlet != null) {
-            	System.out.println(servlet);
                 servlet.handle(requestInfo, out);
             } else {
-            	System.out.println("noooooo");
                 out.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
             }
         } catch (IOException e) {
@@ -172,14 +164,6 @@ public class MyHTTPServer extends Thread implements HTTPServer {
             default:
                 return null;
         }
-        System.out.println(commandMap.get(uri));
-        String match = "";
-        Servlet matchedServlet = null;
-        for (String key : commandMap.keySet()) {
-            if (uri.startsWith(key) && key.length() > match.length()) {
-                match = key;
-                matchedServlet = commandMap.get(key);
-            }
-        }
-        return matchedServlet;    }
+        return commandMap.get(uri);
+    }
 }
